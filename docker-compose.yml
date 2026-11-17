@@ -1,0 +1,29 @@
+services:
+  api:
+    build: .
+    image: retail-region-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_PATH: /data/retail.db
+      BACKFILL_BATCH_SIZE: "500"
+      WORKER_POLL_INTERVAL: "0.25"
+      WORKER_ENABLED: "true"
+    volumes:
+      - retail-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - |
+          import urllib.request
+          urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=2)
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  retail-data:
